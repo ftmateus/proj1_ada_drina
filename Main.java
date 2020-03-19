@@ -33,8 +33,16 @@ public class Main
                                      Integer.parseInt(s[1]),
                                      Integer.parseInt(s[2])));
             }
-            int result = new Drina(offers).solveDP();
+            int result;
+            if (argsL.contains(RECURSION_FLAG))
+                result = new Drina(offers).solveR();
+            else
+                result = new Drina(offers).solveDP();
             results.add(result);
+        }
+        for(int r :results)
+        {
+            System.out.println(r);
         }
         long endTime = System.currentTimeMillis();
         if(argsL.contains(DURATION_FLAG))
@@ -44,7 +52,7 @@ public class Main
     public static class Drina
     {
         public final List<Offer> offers;
-        private int[] matrix;
+        private int[] array;
 
         public Drina(List<Offer> offers)
         {
@@ -56,6 +64,30 @@ public class Main
             throw new Error("Not implemented");
         }
 
+        public int solveR()
+        {
+            int result = Integer.MIN_VALUE;
+            for (int i = 0; i < offers.size(); i++)
+            {
+                int r = solveRS(i);
+                result = r > result ? r : result;
+            }
+            return result;
+        }
+
+        private int solveRS(int o)
+        {   
+            int maxValue = Integer.MIN_VALUE;
+            for(int i = 0; i < offers.size(); i++)
+            {
+                int result = offers.get(o).price;
+                if (offers.get(o).startingTime + offers.get(o).duration <= offers.get(i).startingTime && i != o)
+                    result += solveRS(i);
+                
+                maxValue = result > maxValue ? result : maxValue;
+            }
+            return maxValue;
+        }
     }
 
     public static class Offer
