@@ -41,9 +41,7 @@ public class Main
             results.add(result);
         }
         for(int r :results)
-        {
             System.out.println(r);
-        }
         long endTime = System.currentTimeMillis();
         if(argsL.contains(DURATION_FLAG))
             System.out.println("Duration: " + (endTime - startTime) + " ms");
@@ -51,7 +49,7 @@ public class Main
 
     public static class Drina
     {
-        public final List<Offer> offers;
+        private final List<Offer> offers;
         private int[] array;
 
         public Drina(List<Offer> offers)
@@ -78,12 +76,12 @@ public class Main
         private int solveRS(int o)
         {   
             int maxValue = Integer.MIN_VALUE;
+            Offer f = offers.get(o);
             for(int i = 0; i < offers.size(); i++)
             {
                 int result = offers.get(o).price;
-                if (offers.get(o).startingTime + offers.get(o).duration <= offers.get(i).startingTime && i != o)
+                if (f.startingTime + f.duration <= offers.get(i).startingTime && i != o)
                     result += solveRS(i);
-                
                 maxValue = result > maxValue ? result : maxValue;
             }
             return maxValue;
