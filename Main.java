@@ -55,11 +55,37 @@ public class Main
         public Drina(List<Offer> offers)
         {
             this.offers = offers;
+            this.array = null;
+        }
+
+        public void buildArray()
+        {
+            array = new int[offers.size()];
+            for(int i = 0; i < array.length; i++)
+                array[i] = offers.get(i).price;
         }
 
         public int solveDP()
         {
-            throw new Error("Not implemented");
+            int result = Integer.MIN_VALUE;
+            buildArray();
+            for(int i = 0; i < offers.size(); i++)
+            {
+                int maxValue = Integer.MIN_VALUE;
+                Offer f = offers.get(i);
+                for(int j = 0; j < offers.size(); j++)
+                {
+                    int r = offers.get(i).price;
+                    if (f.startingTime + f.duration <= offers.get(j).startingTime && i != j)
+                    {
+                        result += array[j];
+                    } 
+                    maxValue = r > maxValue ? r : maxValue;
+                }
+                array[i] = maxValue;
+                result = array[i] > result ? array[i] : result;
+            }
+            return result;
         }
 
         public int solveR()
