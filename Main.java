@@ -1,13 +1,27 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.*;
 
 public class Main
 {
+
+    private static final int MAX_TEST_CASES = 100;
+    private static final int MAX_OFFERS = 10000;
+    private static final int MAX_STARTING_INSTANT = 1000000000;
+    private static final int MAX_DURATION = 2*10000;
+    private static final int MAX_PRICE = 10000;
+
     public static List<String> argsL = null;
     public static final String RECURSION_FLAG = "-r", 
-    TEST_INPUT_FLAG = "-t", DURATION_FLAG = "-d", PRINT_MATRIX_FLAG = "-pm";
+    TEST_INPUT_FLAG = "-t", DURATION_FLAG = "-d", PRINT_MATRIX_FLAG = "-pm",
+    GENERATE_FILETEST_FLAG = "-g";
 
 
     public static void main(String[] args) throws Exception
@@ -15,6 +29,12 @@ public class Main
         long startTime = System.currentTimeMillis();
         argsL = Arrays.asList(args);
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        if (argsL.contains(GENERATE_FILETEST_FLAG))
+        {
+            generateTestFile(in);
+            in.close();
+            return;
+        }
         if (argsL.contains(TEST_INPUT_FLAG))
         {
             in = getTestInputReader(in);
@@ -48,6 +68,41 @@ public class Main
         if(argsL.contains(DURATION_FLAG))
             System.out.println("Duration: " + (endTime - startTime) + " ms");
     }   
+
+    public static void generateTestFile(BufferedReader in) throws IOException
+    {
+        System.out.print("Test cases:");
+        int test_cases = Integer.parseInt(in.readLine());
+        System.out.print("Max offers: ");
+        int max_offers = Integer.parseInt(in.readLine());
+        System.out.print("Max start time: ");
+        int max_start = Integer.parseInt(in.readLine());
+        System.out.print("Max duration: ");
+        int max_duration = Integer.parseInt(in.readLine());
+        System.out.print("Max price: ");
+        int max_price = Integer.parseInt(in.readLine());
+        File f = new File("test" + Double.valueOf(1000*Math.random()).intValue() + ".txt");
+        f.createNewFile();
+        BufferedWriter writer = new BufferedWriter(new FileWriter(f));
+        
+        System.out.println(test_cases);
+        writer.write(test_cases + "\n");
+        for(int i = 0; i < test_cases; i++)
+        {
+            int offers = Double.valueOf(Math.random()*(max_offers - 1) + 1).intValue();
+            writer.write(offers + "\n");
+            for(int j = 0; j  < offers; j++)
+            {
+                int start = Double.valueOf(Math.random()*max_start).intValue();
+                int duration = Double.valueOf(Math.random()*(max_duration - 1) + 1).intValue();
+                int price = Double.valueOf(Math.random()*(max_price - 1) + 1).intValue();
+                writer.write(String.format("%d %d %d\n", start, duration, price));
+            }
+        }
+        writer.close();
+        System.out.println("File generated");
+    }
+
 
     public static class Drina
     {
@@ -117,7 +172,7 @@ public class Main
 
         public int solveDP()
         {
-            throw new Error("Not inplemented");
+            throw new Error();
         }
 
         public int solveR()
