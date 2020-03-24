@@ -25,13 +25,15 @@ public class Main
         for(int t = 0; t < test_cases; t++)
         {
             int numberOffers = Integer.parseInt(in.readLine());
-            List<Offer> offers = new ArrayList<Offer>(numberOffers);
+            SortedMap<Integer, Offer> offers = new TreeMap<Integer, Offer>();
             for(int i = 0; i < numberOffers; i++)
             {
                 String[] s = in.readLine().split(" ");
-                offers.add(new Offer(Integer.parseInt(s[0]),
-                                     Integer.parseInt(s[1]),
-                                     Integer.parseInt(s[2])));
+                int start = Integer.parseInt(s[0]);
+                offers.put(start,
+                new Offer(start,
+                        Integer.parseInt(s[1]),
+                        Integer.parseInt(s[2])));
             }
             int result;
             if (argsL.contains(RECURSION_FLAG))
@@ -52,66 +54,102 @@ public class Main
         private final List<Offer> offers;
         private int[] array;
 
-        public Drina(List<Offer> offers)
+        public Drina(SortedMap<Integer, Offer> offers)
         {
-            this.offers = offers;
+            this.offers = new ArrayList<Offer>(offers.values());
             this.array = null;
         }
 
         public void buildArray()
         {
-            array = new int[offers.size()];
+            array = new int[offers.size() + 1];
             for(int i = 0; i < array.length; i++)
-                array[i] = offers.get(i).price;
+                array[i] = 0;
         }
+
+        // public int solveDP()
+        // {
+        //     int result = Integer.MIN_VALUE;
+        //     buildArray();
+        //     for(int i = 0; i < offers.size(); i++)
+        //     {
+        //         int maxValue = Integer.MIN_VALUE;
+        //         Offer f = offers.get(i);
+        //         for(int j = 0; j < offers.size(); j++)
+        //         {
+        //             int r = offers.get(i).price;
+        //             if (f.startingTime + f.duration <= offers.get(j).startingTime && i != j)
+        //             {
+        //                 result += array[j];
+        //             } 
+        //             maxValue = r > maxValue ? r : maxValue;
+        //         }
+        //         array[i] = maxValue;
+        //         result = array[i] > result ? array[i] : result;
+        //     }
+        //     return result;
+        // }
+
+        // public int solveR()
+        // {
+        //     int result = Integer.MIN_VALUE;
+        //     for (int i = 0; i < offers.size(); i++)
+        //     {
+        //         int r = solveRS(i);
+        //         result = r > result ? r : result;
+        //     }
+        //     return result;
+        // }
+
+        // private int solveRS(int o)
+        // {   
+        //     int maxValue = Integer.MIN_VALUE;
+        //     Offer f = offers.get(o);
+        //     for(int i = 0; i < offers.size(); i++)
+        //     {
+        //         int result = f.price;
+        //         if (f.startingTime + f.duration <= offers.get(i).startingTime && i != o)
+        //             result += solveRS(i);
+        //         maxValue = result > maxValue ? result : maxValue;
+        //     }
+        //     return maxValue;
+        // }
 
         public int solveDP()
         {
-            int result = Integer.MIN_VALUE;
-            buildArray();
-            for(int i = 0; i < offers.size(); i++)
-            {
-                int maxValue = Integer.MIN_VALUE;
-                Offer f = offers.get(i);
-                for(int j = 0; j < offers.size(); j++)
-                {
-                    int r = offers.get(i).price;
-                    if (f.startingTime + f.duration <= offers.get(j).startingTime && i != j)
-                    {
-                        result += array[j];
-                    } 
-                    maxValue = r > maxValue ? r : maxValue;
-                }
-                array[i] = maxValue;
-                result = array[i] > result ? array[i] : result;
-            }
-            return result;
+            throw new Error("Not inplemented");
         }
 
         public int solveR()
         {
-            int result = Integer.MIN_VALUE;
-            for (int i = 0; i < offers.size(); i++)
-            {
-                int r = solveRS(i);
-                result = r > result ? r : result;
-            }
-            return result;
+            return solveRS(offers.size());
         }
 
-        private int solveRS(int o)
-        {   
-            int maxValue = Integer.MIN_VALUE;
-            Offer f = offers.get(o);
-            for(int i = 0; i < offers.size(); i++)
+        public int solveRS(int i)
+        {
+            if (i == 0)
+                return 0;
+            if (compatible(i - 1, i))
+                return offers.get(i - 1).price + solveRS(i - 1);
+            else
             {
-                int result = offers.get(o).price;
-                if (f.startingTime + f.duration <= offers.get(i).startingTime && i != o)
-                    result += solveRS(i);
-                maxValue = result > maxValue ? result : maxValue;
+                int max = 0;
+                for(int k = i - Math.min(i - 1, 2); k > 0; k--)
+                {
+                    int r = offers.get(i - 1).price + (compatible(k, i) ? solveRS(k) : 0);
+                    max = r > max ? r : max;
+                }
+                return max;
             }
-            return maxValue;
         }
+
+        private boolean compatible(int i, int j)
+        {
+            return i == 0 || (offers.get(i - 1).startingTime + offers.get(i - 1).duration <= offers.get(j - 1).startingTime);
+        }
+
+
+
     }
 
     public static class Offer
