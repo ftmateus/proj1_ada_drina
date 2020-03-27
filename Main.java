@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main
 {
@@ -41,28 +43,29 @@ public class Main
             startTime = System.currentTimeMillis();
         }
         int test_cases = Integer.parseInt(in.readLine());
-        List<Integer> results = new LinkedList<Integer>();
+        List<Long> results = new LinkedList<Long>();
         for(int t = 0; t < test_cases; t++)
         {
             int numberOffers = Integer.parseInt(in.readLine());
-            SortedMap<Integer, Offer> offers = new TreeMap<Integer, Offer>();
+            SortedSet<Offer> offers = new TreeSet<Offer>(new offerCompEndTime());
             for(int i = 0; i < numberOffers; i++)
             {
                 String[] s = in.readLine().split(" ");
                 int start = Integer.parseInt(s[0]);
-                offers.put(start,
-                new Offer(start,
-                        Integer.parseInt(s[1]),
+                int duration = Integer.parseInt(s[1]);
+                offers.add(
+                        new Offer(start
+                        , duration,
                         Integer.parseInt(s[2])));
             }
-            int result;
+            long result;
             if (argsL.contains(RECURSION_FLAG))
                 result = new Drina(offers).solveR();
             else
                 result = new Drina(offers).solveDP();
             results.add(result);
         }
-        for(int r :results)
+        for(long r :results)
             System.out.println(r);
         long endTime = System.currentTimeMillis();
         if(argsL.contains(DURATION_FLAG))
@@ -106,118 +109,129 @@ public class Main
 
     public static class Drina
     {
-        private final List<Offer> offers;
-        private int[] array;
+        private final Offer[] offers;
+        private long[] array;
+        private long[] maxComb;
 
-        public Drina(SortedMap<Integer, Offer> offers)
+        public Drina(SortedSet<Offer> offers)
         {
-            this.offers = new ArrayList<Offer>(offers.values());
+            this.offers = offers.toArray(new Offer[offers.size()]);
             this.array = null;
         }
 
         public void buildArray()
         {
-            array = new int[offers.size() + 1];
+            array = new long[offers.length + 1];
+            maxComb = new long[offers.length + 1];
             for(int i = 0; i < array.length; i++)
+            {
                 array[i] = 0;
+                maxComb[i] = 0;
+            }
+                
         }
 
-        // public int solveDP()
-        // {
-        //     int result = Integer.MIN_VALUE;
-        //     buildArray();
-        //     for(int i = 0; i < offers.size(); i++)
-        //     {
-        //         int maxValue = Integer.MIN_VALUE;
-        //         Offer f = offers.get(i);
-        //         for(int j = 0; j < offers.size(); j++)
-        //         {
-        //             int r = offers.get(i).price;
-        //             if (f.startingTime + f.duration <= offers.get(j).startingTime && i != j)
-        //             {
-        //                 result += array[j];
-        //             } 
-        //             maxValue = r > maxValue ? r : maxValue;
-        //         }
-        //         array[i] = maxValue;
-        //         result = array[i] > result ? array[i] : result;
-        //     }
-        //     return result;
-        // }
-
-        // public int solveR()
-        // {
-        //     int result = Integer.MIN_VALUE;
-        //     for (int i = 0; i < offers.size(); i++)
-        //     {
-        //         int r = solveRS(i);
-        //         result = r > result ? r : result;
-        //     }
-        //     return result;
-        // }
-
-        // private int solveRS(int o)
-        // {   
-        //     int maxValue = Integer.MIN_VALUE;
-        //     Offer f = offers.get(o);
-        //     for(int i = 0; i < offers.size(); i++)
-        //     {
-        //         int result = f.price;
-        //         if (f.startingTime + f.duration <= offers.get(i).startingTime && i != o)
-        //             result += solveRS(i);
-        //         maxValue = result > maxValue ? result : maxValue;
-        //     }
-        //     return maxValue;
-        // }
-
-        public int solveDP()
+        public long solveDP()
         {
-            throw new Error();
+         
+            // for(Offer o : offers)
+            // {    System.out.println(o);
+            // }
+            //System.out.println();
+            buildArray();
+            for(int i = 1; i <= offers.length; i++)
+            {
+                long max = getOffer(i).price;
+                for(int k = 1; k <= offers.length;  k++)
+                {   
+                    long r = 0;
+                    if(compatible(k, i))
+                    {
+                        if (k == 0 || array[k] > array[k-1])
+                        {
+                            r = getOffer(i).price + array[k];
+                        }
+                        else
+                        {
+                            r = getOffer(i).price;
+                        }
+                    }
+                    else
+                    {
+                        r = getOffer(i).price;
+                    }
+        
+                    // long r = (compatible(k, i) && (k == 0 || array[k] > array[k-1])? 
+                    // getOffer(i).price + array[k] 
+                    // : array[k]);
+                    max = Math.max(max, r);
+                }
+                // System.out.println(max + " " + array[i-1]);
+                array[i] = Math.max( max, array[i-1]);
+            }
+            // System.out.println();
+            // for(long r : array)
+            // {
+                // System.out.println(r);
+            // }
+            // System.out.println();
+            return array[offers.length];
         }
 
         public int solveR()
         {
-            return solveRS(offers.size());
+            return solveRS(offers.length);
+        }
+
+        private Offer getOffer(int i)
+        {
+            return offers[i-1];
         }
 
         public int solveRS(int i)
         {
             if (i == 0)
                 return 0;
-            if (compatible(i - 1, i))
-                return offers.get(i - 1).price + solveRS(i - 1);
-            else
+            // if (compatible(i - 1, i))
+            //     return getOffer(i).price + solveRS(i - 1);
+            // else
+            // {
+            int max = getOffer(i).price;
+            for(int k = i - 1; k >= 0; k--)
             {
-                int max = 0;
-                for(int k = i - Math.min(i - 1, 2); k > 0; k--)
-                {
-                    int r = offers.get(i - 1).price + (compatible(k, i) ? solveRS(k) : 0);
-                    max = r > max ? r : max;
-                }
-                return max;
+                int r = (compatible(k, i) ? 
+                getOffer(i).price + solveRS(k) 
+                : solveRS(k));
+                
+                max = r > max ? r : max;
             }
+            return max;
+            // }
         }
 
         private boolean compatible(int i, int j)
         {
-            return i == 0 || (offers.get(i - 1).startingTime + offers.get(i - 1).duration <= offers.get(j - 1).startingTime);
+            return i == 0 || (getOffer(i).endTime <= getOffer(j).startingTime);
         }
-
-
 
     }
 
     public static class Offer
     {
-        public final int duration;
+        public final int endTime;
         public final int startingTime;
         public final int price;
 
         public Offer(int startingTime, int duration, int price)
         {
             this.startingTime = startingTime;
-            this.duration = duration;
+            this.endTime = startingTime + duration;
             this.price = price;
+        }
+
+        public String toString()
+        {
+            return String.format("(%d %d %d)", startingTime, endTime, price);
         }
     }
 
@@ -228,5 +242,36 @@ public class Main
         String file = in.readLine();
         in.close();
         return new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+    }
+
+    private static class offerCompEndTime implements Comparator<Offer>
+    {
+
+        public offerCompEndTime(){}
+
+        @Override
+        public int compare(Offer o1, Offer o2) {
+            if(o1.endTime < o2.endTime)
+                return -1;
+            if(o1.endTime > o2.endTime)
+                return 1;
+            if(o1.endTime == o2.endTime)
+            {
+                if(o1.startingTime < o2.startingTime)
+                {
+                    return -1;
+                }
+                if(o1.startingTime > o2.startingTime)
+                {
+                    return 1;
+                }
+                if(o1.startingTime == o2.startingTime)
+                {
+                    return o1.price < o2.price ? 0 : 1;
+                }
+            }
+            return 0;
+        }
+        
     }
 }
