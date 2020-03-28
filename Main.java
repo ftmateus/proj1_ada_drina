@@ -14,6 +14,10 @@ import Drina.*;
 
 public class Main
 {
+
+    /**
+     * List of the program arguments.
+     */
     public static List<String> argsL = null;
     /**
      * Flags
@@ -21,8 +25,7 @@ public class Main
     public static final String 
     RECURSION_FLAG = "-r", 
     TEST_INPUT_FLAG = "-t",
-    DURATION_FLAG = "-d", 
-    PRINT_MATRIX_FLAG = "-pm",
+    DURATION_FLAG = "-d",
     GENERATE_TESTFILE_FLAG = "-g";
 
     public static void main(String[] args) throws Exception
