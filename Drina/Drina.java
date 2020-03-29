@@ -51,10 +51,11 @@ public class Drina
         for(int i = 1; i <= offers.size(); i++)
         {
             long max = getOffer(i).price;
-            for(int k = 1; compatible(k, i);  k++)
+            boolean found = false;
+            for(int k = Math.max(i - 1, 1); k > 0 && !found;  k--)
             {   
                 long r = 0;
-                if(k == 0 || maxProfit[k] > maxProfit[k-1])
+                if((compatible(k, i) && (found = maxProfit[k] > maxProfit[k-1])))
                     r = getOffer(i).price + maxProfit[k];
                 max = Math.max(max, r);
             }
@@ -76,6 +77,7 @@ public class Drina
         {
             long r = 0;
             long lastProfit = solveRS(k);
+            // o k == 0 foi engano
             if(k == 0 || lastProfit > solveRS(k-1))
                 r = getOffer(i).price + lastProfit;
             max = Math.max(max, r);
