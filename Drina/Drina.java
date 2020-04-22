@@ -78,7 +78,7 @@ public class Drina
             long r = 0;
             long lastProfit = solveRS(k);
             // o k == 0 foi engano
-            if(k == 0 || lastProfit > solveRS(k-1))
+            if(lastProfit > solveRS(k-1))
                 r = getOffer(i).price + lastProfit;
             max = Math.max(max, r);
         }
@@ -107,7 +107,7 @@ public class Drina
      */
     private boolean compatible(int i, int j)
     {
-        return i == 0 || (getOffer(i).endTime <= getOffer(j).startingTime);
+        return (getOffer(i).endTime <= getOffer(j).startingTime);
     }
 }
 

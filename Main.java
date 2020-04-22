@@ -64,13 +64,19 @@ public class Main
             else
                 result = new Drina(offers).solveDP();
             results.add(result);
+            System.out.println(result);
         }
         in.close();
-        for(long r : results)
-            System.out.println(r);
+        // for(long r : results)
+        //     System.out.println(r);
         long endTime = System.currentTimeMillis();
         if(argsL.contains(DURATION_FLAG))
+        {
+            Runtime r = Runtime.getRuntime();
             System.out.println("Duration: " + (endTime - startTime) + " ms");
+            System.out.println((r.totalMemory()  - r.freeMemory())/1024);
+        }
+            
     }   
 
     private static BufferedReader getTestInputReader(BufferedReader in) throws Exception
